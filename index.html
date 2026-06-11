@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>NEXUS — Academic OS</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;500;600;700;800&display=swap');
+:root{
+  --bg:#020305;--surf:#060810;--card:#090c15;--card2:#0c1019;--card3:#10141f;
+  --b1:#111828;--b2:#172030;--b3:#0a1020;
+  --cyan:#0099cc;--cyanL:#00bbee;--cyanD:#006688;
+  --blue:#1040cc;--blueL:#1a52e0;--blueD:#0a2a88;
+  --navy:#060e22;--navyL:#091528;
+  --text:#b8c8e0;--textB:#d8e4f4;--textW:#eef4ff;
+  --muted:#3a4d68;--muted2:#25344a;
+  --easy:#00bb7a;--med:#e08800;--hard:#dd2244;--gold:#d4a010;
+  --mono:'Orbitron',sans-serif;
+  --sans:'Rajdhani',sans-serif;
+  --r:1px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);display:flex;flex-direction:column;}
+
+/* ─── SCANLINES ─── */
+body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:repeating-linear-gradient(180deg,rgba(0,0,0,0) 0px,rgba(0,0,0,0) 1px,rgba(0,80,140,0.018) 1px,rgba(0,80,140,0.018) 2px);
+}
+
+/* ─── ONBOARDING SCREEN ─── */
+#onboard{position:fixed;inset:0;background:var(--bg);z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;gap:20px;}
+#onboard.hidden{display:none;}
+.ob-logo{font-family:var(--mono);font-size:24px;letter-spacing:5px;color:var(--cyanL);text-shadow:0 0 16px rgba(0,153,204,0.5);text-align:center;}
+.ob-logo sub{font-size:10px;letter-spacing:2px;color:var(--muted);display:block;margin-top:4px;font-family:var(--sans);}
+.ob-line{width:140px;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);}
+.ob-title{font-size:12px;color:var(--muted);font-family:var(--mono);letter-spacing:1.5px;text-align:center;}
+.ob-avatar-ring{width:86px;height:86px;border-radius:50%;border:2px solid var(--cyan);display:flex;align-items:center;justify-content:center;font-size:38px;background:var(--card);box-shadow:0 0 16px rgba(0,100,180,0.25);cursor:pointer;position:relative;overflow:hidden;}
+.ob-avatar-ring img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:none;}
+.ob-avatar-hint{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:1px;text-align:center;margin-top:5px;}
+.ob-form{width:100%;display:flex;flex-direction:column;gap:10px;}
+.ob-inp{width:100%;background:var(--card);border:1px solid var(--b2);border-radius:var(--r);padding:12px 14px;color:var(--textW);font-family:var(--sans);font-size:16px;font-weight:600;outline:none;}
+.ob-inp:focus{border-color:var(--cyan);box-shadow:0 0 0 2px rgba(0,100,180,0.12);}
+.ob-inp::placeholder{color:var(--muted);}
+.ob-school{width:100%;background:var(--card);border:1px solid var(--b2);border-radius:var(--r);padding:11px 14px;color:var(--textB);font-family:var(--sans);font-size:14px;font-weight:500;outline:none;}
+.ob-school:focus{border-color:var(--blueL);}
+.ob-school::placeholder{color:var(--muted2);}
+.ob-grade-row{display:flex;gap:6px;}
+.ob-grade-btn{flex:1;padding:9px 4px;background:var(--card);border:1px solid var(--b1);border-radius:var(--r);color:var(--muted);font-family:var(--mono);font-size:11px;cursor:pointer;transition:all 0.2s;letter-spacing:0.5px;}
+.ob-grade-btn.sel{background:rgba(16,64,204,0.18);border-color:var(--blueL);color:var(--cyanL);}
+.ob-start{width:100%;padding:13px;background:linear-gradient(90deg,var(--blue),var(--blueD));color:var(--textW);border:none;border-radius:var(--r);font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);}
+
+/* ─── HEADER ─── */
+.header{background:linear-gradient(180deg,#030409 0%,var(--surf) 100%);border-bottom:1px solid var(--b1);padding:12px 16px 10px;position:relative;z-index:10;flex-shrink:0;}
+.header::after{content:'';display:block;height:1px;background:linear-gradient(90deg,transparent 0%,var(--blueD) 30%,var(--cyan) 60%,transparent 100%);margin-top:9px;opacity:0.5;}
+.h-top{display:flex;align-items:center;gap:10px;}
+.h-avatar{width:36px;height:36px;border-radius:50%;border:1px solid var(--cyan);overflow:hidden;flex-shrink:0;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;}
+.h-avatar img{width:100%;height:100%;object-fit:cover;display:none;}
+.h-meta{flex:1;min-width:0;}
+.h-name{font-family:var(--sans);font-size:15px;font-weight:700;color:var(--textW);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;letter-spacing:0.5px;}
+.h-school{font-family:var(--sans);font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500;letter-spacing:0.3px;}
+.h-date{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.8px;flex-shrink:0;}
+.h-xp-row{display:flex;justify-content:space-between;align-items:center;margin-top:7px;margin-bottom:4px;}
+.h-rank{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;color:var(--cyanL);border:1px solid rgba(0,153,204,0.3);padding:2px 8px;clip-path:polygon(5px 0%,100% 0%,calc(100%-5px) 100%,0% 100%);background:rgba(0,80,140,0.12);}
+.h-xpnum{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:0.5px;}
+.h-track{height:2px;background:var(--b2);position:relative;overflow:hidden;}
+.h-fill{height:100%;background:linear-gradient(90deg,var(--blueD),var(--blue),var(--cyanL));box-shadow:0 0 5px var(--cyan);transition:width .6s cubic-bezier(.4,0,.2,1);}
+
+/* ─── SCROLL AREA ─── */
+.scroll-area{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;}
+.scroll-area::-webkit-scrollbar{width:2px;}
+.scroll-area::-webkit-scrollbar-track{background:transparent;}
+.scroll-area::-webkit-scrollbar-thumb{background:var(--b2);}
+
+/* ─── NAV ─── */
+.nav{background:var(--surf);border-top:1px solid var(--b1);display:flex;z-index:10;padding-bottom:env(safe-area-inset-bottom,0px);flex-shrink:0;position:relative;}
+.nav::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--blueD) 40%,var(--cyanD) 60%,transparent);opacity:0.5;}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 2px 5px;gap:2px;background:none;border:none;color:var(--muted);font-family:var(--mono);font-size:7px;letter-spacing:1px;cursor:pointer;transition:color .2s;text-transform:uppercase;position:relative;}
+.nav-btn.active{color:var(--cyanL);}
+.nav-btn svg{width:19px;height:19px;}
+.nav-ind{width:18px;height:2px;background:linear-gradient(90deg,var(--blueD),var(--cyanL));opacity:0;box-shadow:0 0 4px var(--cyanD);border-radius:1px;transition:opacity .2s;}
+.nav-btn.active .nav-ind{opacity:1;}
+
+/* ─── PAGES ─── */
+.page{display:none;padding:14px 14px 20px;}
+.page.active{display:block;}
+
+/* ─── SECTION TITLE ─── */
+.st{font-family:var(--mono);font-size:9px;letter-spacing:3px;color:var(--cyanL);text-transform:uppercase;display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+.st::before{content:'//';color:var(--blueL);font-size:10px;}
+.st::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--b2),transparent);}
+
+/* ─── CARD ─── */
+.card{background:var(--card);border:1px solid var(--b1);border-radius:var(--r);padding:14px;margin-bottom:10px;position:relative;}
+.card.glowL::before{content:'';position:absolute;top:0;left:0;width:2px;height:100%;background:linear-gradient(180deg,var(--cyanL),var(--blue));}
+.card.glowL{padding-left:16px;}
+
+/* ─── DAY TABS ─── */
+.dtabs{display:flex;gap:5px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none;margin-bottom:12px;}
+.dtabs::-webkit-scrollbar{display:none;}
+.dt{flex-shrink:0;padding:5px 12px;border:1px solid var(--b1);background:var(--card);color:var(--muted);font-size:10px;font-family:var(--mono);letter-spacing:1px;cursor:pointer;transition:all .2s;clip-path:polygon(4px 0%,100% 0%,calc(100%-4px) 100%,0% 100%);}
+.dt.active{background:rgba(0,80,140,0.15);border-color:var(--cyanD);color:var(--cyanL);box-shadow:0 0 8px rgba(0,80,140,0.2);}
+.today-chip{font-size:7px;background:var(--blueD);color:var(--textW);padding:1px 4px;letter-spacing:0.5px;margin-left:3px;border-radius:1px;}
+
+/* ─── SUBJECT ITEM ─── */
+.si{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--b1);}
+.si:last-child{border-bottom:none;padding-bottom:0;}
+.sibar{width:2px;height:30px;border-radius:1px;flex-shrink:0;}
+.siinfo{flex:1;min-width:0;}
+.siname{font-family:var(--sans);font-size:14px;font-weight:700;color:var(--textB);letter-spacing:0.3px;}
+.sitime{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:2px;letter-spacing:0.5px;}
+.sidel{background:none;border:1px solid var(--b1);color:var(--muted);cursor:pointer;padding:4px 8px;font-size:9px;font-family:var(--mono);letter-spacing:1px;transition:all .2s;flex-shrink:0;}
+.sidel:active{border-color:var(--hard);color:var(--hard);}
+
+/* ─── INPUTS ─── */
+.inp{flex:1;min-width:80px;background:var(--bg);border:1px solid var(--b2);border-radius:var(--r);padding:10px 12px;color:var(--textW);font-family:var(--sans);font-size:14px;font-weight:500;outline:none;transition:border-color .2s,box-shadow .2s;}
+.inp:focus{border-color:var(--cyanD);box-shadow:0 0 0 2px rgba(0,80,140,0.15);}
+.inp::placeholder{color:var(--muted2);}
+select.inp{cursor:pointer;}
+select.inp option{background:var(--card);}
+.frow{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
+.flabel{font-family:var(--mono);font-size:8px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:4px;}
+
+/* ─── BUTTONS ─── */
+.btn{padding:10px 16px;border:none;font-family:var(--mono);font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:1.5px;text-transform:uppercase;clip-path:polygon(6px 0%,100% 0%,calc(100%-6px) 100%,0% 100%);}
+.btn-p{background:linear-gradient(90deg,var(--blue),var(--blueD));color:var(--textW);border:1px solid rgba(16,64,204,0.5);box-shadow:0 0 10px rgba(10,42,136,0.3);}
+.btn-p:active{opacity:.8;transform:scale(.97);}
+.btn-c{background:transparent;color:var(--cyanL);border:1px solid rgba(0,100,160,0.4);}
+.btn-g{background:var(--card2);color:var(--text);border:1px solid var(--b1);}
+.btn-sm{padding:7px 12px;font-size:10px;}
+.btn-full{width:100%;}
+
+/* ─── TASK ITEM ─── */
+.ti{display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-bottom:1px solid var(--b1);}
+.ti:last-child{border-bottom:none;}
+.tck{width:19px;height:19px;border:1px solid var(--b2);background:none;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;margin-top:2px;border-radius:1px;}
+.tck.done{background:var(--easy);border-color:var(--easy);box-shadow:0 0 5px rgba(0,187,122,0.3);}
+.tck svg{width:10px;height:10px;stroke:#020305;display:none;}
+.tck.done svg{display:block;}
+.tbody{flex:1;min-width:0;}
+.tname{font-family:var(--sans);font-size:14px;font-weight:600;line-height:1.3;color:var(--textB);letter-spacing:0.2px;}
+.tname.dk{text-decoration:line-through;color:var(--muted);}
+.tmeta{display:flex;gap:4px;margin-top:5px;flex-wrap:wrap;}
+.badge{padding:2px 7px;font-size:9px;font-weight:600;letter-spacing:1px;font-family:var(--mono);clip-path:polygon(3px 0%,100% 0%,calc(100%-3px) 100%,0% 100%);}
+.be{background:rgba(0,187,122,0.12);color:var(--easy);}
+.bm{background:rgba(224,136,0,0.12);color:var(--med);}
+.bh{background:rgba(221,34,68,0.12);color:var(--hard);}
+.bx{background:rgba(0,80,140,0.18);color:var(--cyanL);}
+.bs{background:rgba(16,64,204,0.15);color:#7090dd;}
+.bd{background:var(--card2);color:var(--muted);}
+.tdel{background:none;border:none;color:var(--muted2);cursor:pointer;padding:3px 5px;font-size:12px;flex-shrink:0;}
+
+/* ─── TABS ─── */
+.tabs{display:flex;margin-bottom:12px;border:1px solid var(--b1);}
+.tabb{flex:1;padding:8px;border:none;background:transparent;color:var(--muted);font-family:var(--mono);font-size:9px;font-weight:500;cursor:pointer;transition:all .2s;text-transform:uppercase;letter-spacing:1.5px;}
+.tabb.active{background:rgba(0,60,120,0.12);color:var(--cyanL);border-bottom:2px solid var(--cyanD);}
+
+/* ─── RANK HERO ─── */
+.rank-hero{background:radial-gradient(ellipse at 50% 0%,rgba(10,42,136,0.22) 0%,transparent 65%),var(--card);border:1px solid var(--b2);border-top:2px solid var(--cyanD);padding:22px 20px;margin-bottom:12px;text-align:center;}
+.remblem{font-size:42px;margin-bottom:6px;filter:drop-shadow(0 0 8px rgba(0,80,140,0.5));}
+.rname{font-family:var(--mono);font-size:16px;letter-spacing:5px;color:var(--textW);text-transform:uppercase;margin-bottom:4px;}
+.rxp{font-family:var(--mono);font-size:36px;font-weight:700;background:linear-gradient(90deg,var(--cyanL),var(--blueL));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;}
+.rxpl{font-family:var(--sans);font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:3px;font-weight:500;}
+.srow{display:flex;gap:8px;margin-bottom:12px;}
+.sbox{flex:1;background:var(--card);border:1px solid var(--b1);padding:11px;text-align:center;position:relative;}
+.sbox::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--blueD),var(--cyanD));}
+.sval{font-family:var(--mono);font-size:22px;color:var(--cyanL);}
+.slbl{font-family:var(--sans);font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:3px;font-weight:600;}
+.rgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:12px;}
+.rtile{background:var(--card);border:1px solid var(--b1);padding:11px 8px;text-align:center;}
+.rtile.act{border-color:var(--cyanD);background:rgba(0,60,120,0.1);box-shadow:0 0 10px rgba(0,60,120,0.12);}
+.rticon{font-size:20px;margin-bottom:3px;}
+.rtname{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;color:var(--textB);}
+.rtreq{font-family:var(--sans);font-size:10px;color:var(--muted);margin-top:2px;font-weight:500;}
+.rtile.act .rtreq{color:var(--cyanL);}
+.ptbl{width:100%;border-collapse:collapse;}
+.ptbl th{font-family:var(--mono);font-size:8px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;padding:6px 10px;text-align:left;border-bottom:1px solid var(--b1);}
+.ptbl td{padding:9px 10px;border-bottom:1px solid var(--b1);font-family:var(--sans);font-size:13px;font-weight:600;color:var(--text);}
+.ptbl tr:last-child td{border-bottom:none;}
+
+/* ─── INVENTORY ─── */
+.igrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.iitem{background:var(--card);border:1px solid var(--b1);overflow:hidden;position:relative;}
+.iitem::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--blueD),var(--cyanD));}
+.iimg{width:100%;aspect-ratio:1;object-fit:cover;background:var(--surf);display:block;}
+.iph{width:100%;aspect-ratio:1;background:var(--surf);display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--muted2);}
+.iinfo{padding:7px 9px;}
+.iname{font-family:var(--sans);font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--textB);letter-spacing:0.3px;}
+.idel{position:absolute;top:6px;right:5px;background:rgba(2,3,5,0.85);border:1px solid var(--b1);width:20px;height:20px;color:var(--muted);font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.iempty{grid-column:1/-1;text-align:center;padding:36px 0;color:var(--muted);font-family:var(--mono);font-size:10px;letter-spacing:2px;}
+.camwrap{position:relative;width:100%;margin-bottom:10px;}
+#camprev{width:100%;aspect-ratio:1;object-fit:cover;background:var(--surf);display:none;}
+#photocvs{display:none;}
+#captimg{width:100%;aspect-ratio:1;object-fit:cover;display:none;}
+.camph{width:100%;aspect-ratio:1;background:var(--surf);border:1px dashed var(--b2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--muted);font-family:var(--mono);font-size:10px;letter-spacing:1.5px;cursor:pointer;}
+.camph svg{width:34px;height:34px;opacity:0.2;}
+.cambtns{display:flex;gap:8px;}
+
+/* ─── PROFILE PAGE ─── */
+.prof-hero{background:radial-gradient(ellipse at 50% 0%,rgba(0,50,150,0.2) 0%,transparent 60%),var(--card);border:1px solid var(--b2);border-top:2px solid var(--blueD);padding:24px 16px 18px;margin-bottom:10px;text-align:center;position:relative;}
+.prof-avatar-wrap{position:relative;display:inline-block;margin-bottom:10px;}
+.prof-avatar{width:80px;height:80px;border-radius:50%;border:2px solid var(--cyanD);background:var(--surf);display:flex;align-items:center;justify-content:center;font-size:36px;overflow:hidden;box-shadow:0 0 16px rgba(0,80,160,0.3);cursor:pointer;}
+.prof-avatar img{width:100%;height:100%;object-fit:cover;display:none;}
+.prof-cam-btn{position:absolute;bottom:2px;right:2px;width:24px;height:24px;background:var(--blueD);border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;}
+.prof-name{font-family:var(--sans);font-size:20px;font-weight:700;color:var(--textW);margin-bottom:2px;letter-spacing:0.5px;}
+.prof-school{font-family:var(--sans);font-size:12px;color:var(--muted);margin-bottom:2px;font-weight:500;}
+.prof-grade{font-family:var(--mono);font-size:9px;color:var(--blueL);letter-spacing:2px;}
+.prof-rank-chip{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--cyanL);border:1px solid rgba(0,100,160,0.4);padding:3px 12px;clip-path:polygon(6px 0%,100% 0%,calc(100%-6px) 100%,0% 100%);background:rgba(0,50,120,0.15);margin-top:8px;}
+.prof-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px;}
+.pstat{background:var(--card);border:1px solid var(--b1);padding:12px 8px;text-align:center;position:relative;}
+.pstat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--blueD);}
+.pstat-val{font-family:var(--mono);font-size:20px;color:var(--cyanL);line-height:1;}
+.pstat-lbl{font-family:var(--sans);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-top:3px;font-weight:600;}
+.prof-edit-section{background:var(--card);border:1px solid var(--b1);border-radius:var(--r);padding:14px;margin-bottom:10px;}
+.prof-edit-title{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;}
+.edit-field{margin-bottom:10px;}
+.edit-field:last-child{margin-bottom:0;}
+.prof-grade-sel{display:flex;gap:6px;flex-wrap:wrap;}
+.pgbtn{padding:7px 10px;background:var(--card2);border:1px solid var(--b1);color:var(--muted);font-family:var(--mono);font-size:10px;cursor:pointer;transition:all .2s;letter-spacing:0.5px;}
+.pgbtn.sel{background:rgba(16,64,204,0.18);border-color:var(--blueL);color:var(--cyanL);}
+.prof-danger{border-top:1px solid var(--b1);padding-top:12px;margin-top:4px;}
+.btn-danger{background:rgba(221,34,68,0.08);color:var(--hard);border:1px solid rgba(221,34,68,0.25);font-size:10px;}
+
+/* ─── TOAST ─── */
+.toast{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-12px);background:var(--card2);border:1px solid var(--b2);border-left:2px solid var(--cyanD);padding:9px 16px;font-family:var(--sans);font-size:13px;font-weight:600;z-index:999;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap;max-width:90vw;display:flex;align-items:center;gap:8px;color:var(--textB);}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast-xp{font-family:var(--mono);color:var(--cyanL);font-size:13px;}
+
+/* ─── MODAL ─── */
+.mov{position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:200;display:none;align-items:flex-end;justify-content:center;}
+.mov.open{display:flex;}
+.modal{background:var(--surf);border:1px solid var(--b2);border-top:2px solid var(--blueD);padding:18px;width:100%;max-height:88vh;overflow-y:auto;}
+.mhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.mtitle{font-family:var(--mono);font-size:11px;letter-spacing:2.5px;color:var(--cyanL);text-transform:uppercase;}
+.mclose{background:none;border:1px solid var(--b1);color:var(--muted);font-size:15px;cursor:pointer;width:26px;height:26px;display:flex;align-items:center;justify-content:center;}
+.color-row{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px;}
+.copt{width:26px;height:26px;cursor:pointer;border:2px solid transparent;transition:all .2s;border-radius:1px;}
+.copt.sel{border-color:#fff;transform:scale(1.15);box-shadow:0 0 6px rgba(255,255,255,0.25);}
+.empty-st{text-align:center;padding:28px 0;color:var(--muted);}
+.eico{font-family:var(--mono);font-size:9px;letter-spacing:2px;margin-bottom:6px;color:var(--muted2);}
+.dsec{opacity:0.55;}
+
+/* ─── PROFILE AVATAR UPLOAD ─── */
+#prof-avatar-upload,#ob-avatar-upload{display:none;}
+</style>
+</head>
+<body>
+
+<!-- ─── ONBOARD ─── -->
+<div id="onboard">
+  <div class="ob-logo">NEXUS<sub>ACADEMIC OS v2.1</sub></div>
+  <div class="ob-line"></div>
+  <div class="ob-title">// INITIALIZE OPERATOR PROFILE //</div>
+  <div style="text-align:center">
+    <div class="ob-avatar-ring" id="ob-av" onclick="document.getElementById('ob-avatar-upload').click()">
+      <span id="ob-av-emoji">👤</span>
+      <img id="ob-av-img" alt="">
+    </div>
+    <input type="file" id="ob-avatar-upload" accept="image/*">
+    <div class="ob-avatar-hint">TAP TO SET PHOTO</div>
+  </div>
+  <div class="ob-form">
+    <div class="flabel">NAMA KAMU</div>
+    <input class="ob-inp" id="ob-name" placeholder="Masukkan nama kamu..." maxlength="30">
+    <div class="flabel">SEKOLAH</div>
+    <input class="ob-school" id="ob-school" placeholder="Nama sekolah (opsional)" maxlength="40">
+    <div class="flabel">KELAS</div>
+    <div class="ob-grade-row" id="ob-grades">
+      <button class="ob-grade-btn" onclick="selGrade('VII',this)">VII</button>
+      <button class="ob-grade-btn" onclick="selGrade('VIII',this)">VIII</button>
+      <button class="ob-grade-btn" onclick="selGrade('IX',this)">IX</button>
+      <button class="ob-grade-btn" onclick="selGrade('X',this)">X</button>
+      <button class="ob-grade-btn" onclick="selGrade('XI',this)">XI</button>
+      <button class="ob-grade-btn" onclick="selGrade('XII',this)">XII</button>
+    </div>
+    <button class="ob-start" onclick="finishOnboard()">INITIALIZE →</button>
+  </div>
+</div>
+
+<!-- ─── TOAST ─── -->
+<div class="toast" id="toast"></div>
+
+<!-- ─── HEADER ─── -->
+<div class="header" id="main-header" style="display:none">
+  <div class="h-top">
+    <div class="h-avatar" id="h-avatar" onclick="switchPage('profil',document.querySelector('.nav-btn[data-page=profil]'))">
+      <span id="h-av-emoji">👤</span>
+      <img id="h-av-img" alt="">
+    </div>
+    <div class="h-meta">
+      <div class="h-name" id="h-name">—</div>
+      <div class="h-school" id="h-school">—</div>
+    </div>
+    <div class="h-date" id="h-date"></div>
+  </div>
+  <div class="h-xp-row">
+    <div class="h-rank" id="h-rank">ROOKIE</div>
+    <div class="h-xpnum" id="h-xpnum">0 XP</div>
+  </div>
+  <div class="h-track"><div class="h-fill" id="h-fill" style="width:0%"></div></div>
+</div>
+
+<!-- ─── SCROLL AREA ─── -->
+<div class="scroll-area" id="scroll-area" style="display:none">
+
+  <!-- JADWAL -->
+  <div class="page active" id="page-jadwal">
+    <div class="st">Jadwal</div>
+    <div class="dtabs" id="day-tabs"></div>
+    <div class="card glowL">
+      <div id="subject-list"></div>
+      <button class="btn btn-p btn-sm btn-full" style="margin-top:10px" onclick="openAddSubject()">+ INSERT PELAJARAN</button>
+    </div>
+  </div>
+
+  <!-- MISI -->
+  <div class="page" id="page-tugas">
+    <div class="st">Misi / Tugas</div>
+    <div class="tabs">
+      <button class="tabb active" onclick="switchTaskTab('todo',this)">Active</button>
+      <button class="tabb" onclick="switchTaskTab('done',this)">Completed</button>
+    </div>
+    <div id="tw-todo">
+      <button class="btn btn-p btn-full" style="margin-bottom:12px" onclick="openAddTask()">+ NEW MISSION</button>
+      <div id="tl-todo"></div>
+    </div>
+    <div id="tw-done" style="display:none"><div id="tl-done"></div></div>
+  </div>
+
+  <!-- RANK -->
+  <div class="page" id="page-rank">
+    <div class="st">Rank System</div>
+    <div class="rank-hero">
+      <div class="remblem" id="r-emblem">&#x2B21;</div>
+      <div class="rname" id="r-name">ROOKIE</div>
+      <div class="rxp" id="r-xp">0</div>
+      <div class="rxpl">Total XP Accumulated</div>
+    </div>
+    <div class="srow">
+      <div class="sbox"><div class="sval" id="s-done">0</div><div class="slbl">Missions Done</div></div>
+      <div class="sbox"><div class="sval" id="s-hard">0</div><div class="slbl">Hard Clear</div></div>
+    </div>
+    <div class="st" style="font-size:10px">Tier List</div>
+    <div class="rgrid" id="rank-grid"></div>
+    <div class="st" style="font-size:10px">XP Reward Table</div>
+    <div class="card" style="padding:0 12px">
+      <table class="ptbl">
+        <tr><th>Difficulty</th><th>XP Reward</th></tr>
+        <tr><td><span class="badge be">EASY</span></td><td style="font-family:var(--mono);color:var(--easy)">+10 XP</td></tr>
+        <tr><td><span class="badge bm">MEDIUM</span></td><td style="font-family:var(--mono);color:var(--med)">+25 XP</td></tr>
+        <tr><td><span class="badge bh">HARD</span></td><td style="font-family:var(--mono);color:var(--hard)">+50 XP</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- INVENTORY -->
+  <div class="page" id="page-inv">
+    <div class="st">Gear / Inventori</div>
+    <button class="btn btn-p btn-full" style="margin-bottom:12px" onclick="openAddInv()">+ SCAN BARANG BARU</button>
+    <div class="igrid" id="inv-grid"></div>
+  </div>
+
+  <!-- PROFIL -->
+  <div class="page" id="page-profil">
+    <div class="st">Profil Operator</div>
+    <div class="prof-hero">
+      <div class="prof-avatar-wrap">
+        <div class="prof-avatar" id="prof-av" onclick="document.getElementById('prof-avatar-upload').click()">
+          <span id="prof-av-emoji">👤</span>
+          <img id="prof-av-img" alt="">
+        </div>
+        <button class="prof-cam-btn">📷</button>
+      </div>
+      <input type="file" id="prof-avatar-upload" accept="image/*">
+      <div class="prof-name" id="p-name">—</div>
+      <div class="prof-school" id="p-school">—</div>
+      <div class="prof-grade" id="p-grade">KELAS —</div>
+      <div class="prof-rank-chip" id="p-rank">ROOKIE</div>
+    </div>
+
+    <div class="prof-stats" id="p-stats">
+      <div class="pstat"><div class="pstat-val" id="ps-xp">0</div><div class="pstat-lbl">Total XP</div></div>
+      <div class="pstat"><div class="pstat-val" id="ps-done">0</div><div class="pstat-lbl">Missions</div></div>
+      <div class="pstat"><div class="pstat-val" id="ps-inv">0</div><div class="pstat-lbl">Gear</div></div>
+    </div>
+
+    <div class="prof-edit-section">
+      <div class="prof-edit-title">// Edit Profil</div>
+      <div class="edit-field">
+        <div class="flabel">Nama</div>
+        <input class="inp" id="edit-name" placeholder="Nama kamu" style="width:100%">
+      </div>
+      <div class="edit-field">
+        <div class="flabel">Sekolah</div>
+        <input class="inp" id="edit-school" placeholder="Nama sekolah" style="width:100%">
+      </div>
+      <div class="edit-field">
+        <div class="flabel">Kelas</div>
+        <div class="prof-grade-sel" id="edit-grades">
+          <button class="pgbtn" onclick="selEditGrade('VII',this)">VII</button>
+          <button class="pgbtn" onclick="selEditGrade('VIII',this)">VIII</button>
+          <button class="pgbtn" onclick="selEditGrade('IX',this)">IX</button>
+          <button class="pgbtn" onclick="selEditGrade('X',this)">X</button>
+          <button class="pgbtn" onclick="selEditGrade('XI',this)">XI</button>
+          <button class="pgbtn" onclick="selEditGrade('XII',this)">XII</button>
+        </div>
+      </div>
+      <button class="btn btn-p btn-sm btn-full" style="margin-top:6px" onclick="saveProfile()">SAVE CHANGES</button>
+    </div>
+
+    <div class="prof-edit-section">
+      <div class="prof-edit-title">// Data & Storage</div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:10px;line-height:1.8">
+        DATA STATUS: <span style="color:var(--easy)">PERSISTED</span><br>
+        ENGINE: <span style="color:var(--cyan)">localStorage</span><br>
+        AUTO-SAVE: <span style="color:var(--easy)">ACTIVE</span>
+      </div>
+      <div class="prof-danger">
+        <div class="flabel" style="margin-bottom:8px;color:var(--hard)">DANGER ZONE</div>
+        <button class="btn btn-danger btn-sm btn-full" onclick="confirmReset()">RESET ALL DATA</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end scroll-area -->
+
+<!-- ─── NAV ─── -->
+<nav class="nav" id="main-nav" style="display:none">
+  <button class="nav-btn active" data-page="jadwal" onclick="switchPage('jadwal',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="1"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    Jadwal<div class="nav-ind"></div>
+  </button>
+  <button class="nav-btn" data-page="tugas" onclick="switchPage('tugas',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+    Misi<div class="nav-ind"></div>
+  </button>
+  <button class="nav-btn" data-page="rank" onclick="switchPage('rank',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+    Rank<div class="nav-ind"></div>
+  </button>
+  <button class="nav-btn" data-page="inv" onclick="switchPage('inv',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="1"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+    Gear<div class="nav-ind"></div>
+  </button>
+  <button class="nav-btn" data-page="profil" onclick="switchPage('profil',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    Profil<div class="nav-ind"></div>
+  </button>
+</nav>
+
+<!-- ─── MODALS ─── -->
+<div class="mov" id="m-subject">
+  <div class="modal">
+    <div class="mhead"><div class="mtitle">Insert Pelajaran</div><button class="mclose" onclick="closeModal('m-subject')">&#x2715;</button></div>
+    <div class="flabel">Hari: <span id="m-day-lbl" style="color:var(--cyan)"></span></div>
+    <div class="frow" style="margin-top:8px">
+      <input class="inp" id="sn" placeholder="Nama pelajaran (IPA, Matematika...)">
+    </div>
+    <div class="flabel">Jam Pelajaran</div>
+    <div class="frow">
+      <input class="inp" id="sts" type="time" style="flex:1">
+      <span style="align-self:center;color:var(--muted);font-family:var(--mono);font-size:12px">&#x2192;</span>
+      <input class="inp" id="ste" type="time" style="flex:1">
+    </div>
+    <div class="flabel">Warna Label</div>
+    <div class="color-row" id="cpicker"></div>
+    <button class="btn btn-p btn-full" onclick="addSubject()">CONFIRM INSERT</button>
+  </div>
+</div>
+
+<div class="mov" id="m-task">
+  <div class="modal">
+    <div class="mhead"><div class="mtitle">New Mission</div><button class="mclose" onclick="closeModal('m-task')">&#x2715;</button></div>
+    <div class="flabel">Nama Tugas</div>
+    <input class="inp" id="tn" placeholder="Kerjakan PR halaman 40..." style="width:100%;margin-bottom:10px">
+    <div class="flabel">Difficulty Level</div>
+    <div class="frow">
+      <select class="inp" id="tdiff">
+        <option value="easy">EASY — +10 XP</option>
+        <option value="med" selected>MEDIUM — +25 XP</option>
+        <option value="hard">HARD — +50 XP</option>
+      </select>
+    </div>
+    <div class="frow">
+      <input class="inp" id="tsubj" placeholder="Mata pelajaran">
+      <input class="inp" id="tdue" type="date">
+    </div>
+    <button class="btn btn-p btn-full" onclick="addTask()">DEPLOY MISSION</button>
+  </div>
+</div>
+
+<div class="mov" id="m-inv">
+  <div class="modal">
+    <div class="mhead"><div class="mtitle">Scan Barang</div><button class="mclose" onclick="closeModal('m-inv');stopCam()">&#x2715;</button></div>
+    <div class="camwrap">
+      <div class="camph" id="camph" onclick="startCam()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        [ TAP TO SCAN ]
+      </div>
+      <video id="camprev" playsinline autoplay></video>
+      <img id="captimg" alt="scan">
+      <canvas id="photocvs"></canvas>
+    </div>
+    <div class="cambtns" id="cambtns" style="display:none;margin-bottom:10px">
+      <button class="btn btn-c btn-sm" onclick="capPhoto()">&#x25C9; CAPTURE</button>
+      <button class="btn btn-g btn-sm" onclick="stopCam();resetCam()">CANCEL</button>
+    </div>
+    <div id="retakebtns" style="display:none;margin-bottom:10px">
+      <button class="btn btn-g btn-sm" onclick="retakePh()">&#x21BA; RETAKE</button>
+    </div>
+    <div class="flabel" style="margin-top:4px">Nama Barang</div>
+    <input class="inp" id="invname" placeholder="Penggaris, Kalkulator, Buku..." style="width:100%;margin-bottom:10px">
+    <button class="btn btn-p btn-full" onclick="addInventory()">REGISTER TO GEAR</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════════
+const DAYS=['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+const COLORS=['#00d4ff','#1a5fff','#6e3aff','#00d68f','#ff9a00','#ff2d55','#a78bfa','#38cfff'];
+const RANKS=[
+  {n:'ROOKIE',  e:'&#x2B21;',min:0},
+  {n:'CADET',   e:'&#x25C8;',min:100},
+  {n:'OPERATOR',e:'&#x25C9;',min:300},
+  {n:'SPECTRE', e:'&#x2B22;',min:600},
+  {n:'ELITE',   e:'&#x2726;',min:1000},
+  {n:'APEX',    e:'&#x2B1F;',min:2000},
+];
+const PTS={easy:10,med:25,hard:50};
+
+// ═══════════════════════════════════════════════
+// STATE — persistent via localStorage
+// ═══════════════════════════════════════════════
+let S = loadState();
+let selDay = getTodayIdx();
+let selColor = COLORS[0];
+let camStream = null;
+let capturedURL = null;
+let obGrade = '';
+let editGrade = '';
+
+function defaultState(){
+  return{
+    profile:{name:'',school:'',grade:'',avatarURL:''},
+    xp:0,
+    subjects:{Senin:[],Selasa:[],Rabu:[],Kamis:[],Jumat:[],Sabtu:[]},
+    tasks:[],
+    inventory:[],
+    initialized:false
+  };
+}
+function loadState(){
+  try{
+    const raw=localStorage.getItem('nexus_v3');
+    if(raw){const p=JSON.parse(raw);if(p&&p.subjects)return p;}
+  }catch(e){}
+  return defaultState();
+}
+function save(){
+  try{localStorage.setItem('nexus_v3',JSON.stringify(S));}
+  catch(e){showToast('WARNING: Storage penuh!');}
+}
+
+// ═══════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════
+window.onload=()=>{
+  if(S.initialized && S.profile.name){
+    hideOnboard();
+    bootApp();
+  } else {
+    document.getElementById('onboard').classList.remove('hidden');
+  }
+  // onboard avatar
+  document.getElementById('ob-avatar-upload').addEventListener('change',e=>{
+    const f=e.target.files[0];if(!f)return;
+    const r=new FileReader();
+    r.onload=ev=>{
+      document.getElementById('ob-av-img').src=ev.target.result;
+      document.getElementById('ob-av-img').style.display='block';
+      document.getElementById('ob-av-emoji').style.display='none';
+    };
+    r.readAsDataURL(f);
+  });
+  // profile avatar
+  document.getElementById('prof-avatar-upload').addEventListener('change',e=>{
+    const f=e.target.files[0];if(!f)return;
+    const r=new FileReader();
+    r.onload=ev=>{
+      const url=ev.target.result;
+      S.profile.avatarURL=url;
+      save();
+      renderAllAvatars();
+    };
+    r.readAsDataURL(f);
+  });
+};
+
+function bootApp(){
+  document.getElementById('main-header').style.display='';
+  document.getElementById('scroll-area').style.display='';
+  document.getElementById('main-nav').style.display='';
+  setDate();
+  buildDayTabs();
+  renderSubjects();
+  renderTasks();
+  renderRank();
+  renderInventory();
+  buildRankGrid();
+  buildColorPicker();
+  renderProfile();
+  renderAllAvatars();
+}
+
+function hideOnboard(){
+  document.getElementById('onboard').classList.add('hidden');
+}
+
+// ═══════════════════════════════════════════════
+// ONBOARD
+// ═══════════════════════════════════════════════
+function selGrade(g,el){
+  obGrade=g;
+  document.querySelectorAll('#ob-grades .ob-grade-btn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+}
+function finishOnboard(){
+  const name=document.getElementById('ob-name').value.trim();
+  if(!name){showToast('WARNING: Masukkan nama kamu');return;}
+  S.profile.name=name;
+  S.profile.school=document.getElementById('ob-school').value.trim();
+  S.profile.grade=obGrade||'';
+  // avatar from onboard
+  const img=document.getElementById('ob-av-img');
+  if(img.style.display!=='none'&&img.src) S.profile.avatarURL=img.src;
+  S.initialized=true;
+  save();
+  hideOnboard();
+  bootApp();
+}
+
+// ═══════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════
+function switchPage(name,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  document.getElementById('scroll-area').scrollTop=0;
+  if(name==='profil') renderProfile();
+}
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+
+// ═══════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════
+let toastT;
+function showToast(msg,xp=0){
+  const t=document.getElementById('toast');
+  t.innerHTML=msg+(xp?` <span class="toast-xp">+${xp} XP</span>`:'');
+  t.classList.add('show');
+  clearTimeout(toastT);
+  toastT=setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ═══════════════════════════════════════════════
+// DATE / TIME
+// ═══════════════════════════════════════════════
+function setDate(){
+  const d=new Date();
+  const ds=['SUN','MON','TUE','WED','THU','FRI','SAT'];
+  const ms=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  document.getElementById('h-date').textContent=`${ds[d.getDay()]} ${String(d.getDate()).padStart(2,'0')}.${ms[d.getMonth()]}`;
+}
+function getTodayIdx(){const d=new Date().getDay();return({1:0,2:1,3:2,4:3,5:4,6:5})[d]??0;}
+
+// ═══════════════════════════════════════════════
+// AVATARS
+// ═══════════════════════════════════════════════
+function renderAllAvatars(){
+  const url=S.profile.avatarURL;
+  // header
+  const himg=document.getElementById('h-av-img');
+  const hemo=document.getElementById('h-av-emoji');
+  if(url){himg.src=url;himg.style.display='block';hemo.style.display='none';}
+  else{himg.style.display='none';hemo.style.display='';}
+  // profile page
+  const pimg=document.getElementById('prof-av-img');
+  const pemo=document.getElementById('prof-av-emoji');
+  if(url){pimg.src=url;pimg.style.display='block';pemo.style.display='none';}
+  else{pimg.style.display='none';pemo.style.display='';}
+}
+
+// ═══════════════════════════════════════════════
+// PROFILE
+// ═══════════════════════════════════════════════
+function renderProfile(){
+  const p=S.profile;
+  document.getElementById('h-name').textContent=p.name||'Operator';
+  document.getElementById('h-school').textContent=p.school||'—';
+  document.getElementById('p-name').textContent=p.name||'—';
+  document.getElementById('p-school').textContent=p.school||'—';
+  document.getElementById('p-grade').textContent=p.grade?`KELAS ${p.grade}`:'';
+  const rank=getRank(S.xp);
+  document.getElementById('p-rank').innerHTML=rank.e+' '+rank.n;
+  document.getElementById('ps-xp').textContent=S.xp;
+  document.getElementById('ps-done').textContent=S.tasks.filter(t=>t.done).length;
+  document.getElementById('ps-inv').textContent=S.inventory.length;
+  // fill edit fields
+  document.getElementById('edit-name').value=p.name||'';
+  document.getElementById('edit-school').value=p.school||'';
+  editGrade=p.grade||'';
+  document.querySelectorAll('#edit-grades .pgbtn').forEach(b=>{
+    b.classList.toggle('sel',b.textContent===editGrade);
+  });
+  renderAllAvatars();
+}
+function selEditGrade(g,el){
+  editGrade=g;
+  document.querySelectorAll('#edit-grades .pgbtn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+}
+function saveProfile(){
+  const name=document.getElementById('edit-name').value.trim();
+  if(!name){showToast('WARNING: Nama tidak boleh kosong');return;}
+  S.profile.name=name;
+  S.profile.school=document.getElementById('edit-school').value.trim();
+  S.profile.grade=editGrade;
+  save();
+  renderProfile();
+  showToast('OK: Profil diperbarui');
+}
+function confirmReset(){
+  if(confirm('RESET SEMUA DATA? Tindakan ini tidak bisa dibatalkan.')){
+    localStorage.removeItem('nexus_v3');
+    location.reload();
+  }
+}
+
+// ═══════════════════════════════════════════════
+// JADWAL
+// ═══════════════════════════════════════════════
+function buildDayTabs(){
+  const ti=getTodayIdx();
+  document.getElementById('day-tabs').innerHTML=DAYS.map((d,i)=>
+    `<button class="dt ${i===selDay?'active':''}" onclick="selDayFn(${i},this)">${d}${i===ti?'<span class="today-chip">NOW</span>':''}</button>`
+  ).join('');
+}
+function selDayFn(idx,btn){
+  selDay=idx;
+  document.querySelectorAll('.dt').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderSubjects();
+}
+function openAddSubject(){
+  document.getElementById('m-day-lbl').textContent=DAYS[selDay];
+  document.getElementById('sn').value='';
+  document.getElementById('sts').value='';
+  document.getElementById('ste').value='';
+  openModal('m-subject');
+}
+function buildColorPicker(){
+  document.getElementById('cpicker').innerHTML=COLORS.map((c,i)=>
+    `<div class="copt ${i===0?'sel':''}" style="background:${c}" onclick="pickColor('${c}',this)"></div>`
+  ).join('');
+}
+function pickColor(c,el){
+  selColor=c;
+  document.querySelectorAll('.copt').forEach(e=>e.classList.remove('sel'));
+  el.classList.add('sel');
+}
+function addSubject(){
+  const name=document.getElementById('sn').value.trim();
+  if(!name){showToast('WARNING: Nama pelajaran kosong');return;}
+  const ts=document.getElementById('sts').value;
+  const te=document.getElementById('ste').value;
+  const day=DAYS[selDay];
+  S.subjects[day].push({id:Date.now(),name,ts,te,color:selColor});
+  save(); renderSubjects(); closeModal('m-subject');
+  showToast('OK: Pelajaran ditambahkan');
+}
+function delSubject(day,id){
+  S.subjects[day]=S.subjects[day].filter(s=>s.id!==id);
+  save(); renderSubjects();
+}
+function renderSubjects(){
+  const day=DAYS[selDay], list=S.subjects[day];
+  const el=document.getElementById('subject-list');
+  if(!list.length){
+    el.innerHTML='<div class="empty-st"><div class="eico">// NO DATA //</div>Belum ada pelajaran hari ini</div>';
+    return;
+  }
+  el.innerHTML=list.map(s=>`
+    <div class="si">
+      <div class="sibar" style="background:${s.color};box-shadow:0 0 6px ${s.color}55"></div>
+      <div class="siinfo">
+        <div class="siname">${s.name}</div>
+        ${s.ts?`<div class="sitime">${s.ts}${s.te?' &#x2192; '+s.te:''}</div>`:''}
+      </div>
+      <button class="sidel" onclick="delSubject('${day}',${s.id})">DEL</button>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════
+// TASKS
+// ═══════════════════════════════════════════════
+let taskTab='todo';
+function switchTaskTab(tab,btn){
+  taskTab=tab;
+  document.querySelectorAll('.tabb').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tw-todo').style.display=tab==='todo'?'block':'none';
+  document.getElementById('tw-done').style.display=tab==='done'?'block':'none';
+}
+function openAddTask(){
+  document.getElementById('tn').value='';
+  document.getElementById('tsubj').value='';
+  document.getElementById('tdue').value='';
+  document.getElementById('tdiff').value='med';
+  openModal('m-task');
+}
+function addTask(){
+  const name=document.getElementById('tn').value.trim();
+  if(!name){showToast('WARNING: Nama tugas kosong');return;}
+  const diff=document.getElementById('tdiff').value;
+  const subj=document.getElementById('tsubj').value.trim();
+  const due=document.getElementById('tdue').value;
+  S.tasks.push({id:Date.now(),name,diff,subj,due,done:false});
+  save(); renderTasks(); closeModal('m-task');
+  showToast('OK: Mission deployed');
+}
+function toggleTask(id){
+  const t=S.tasks.find(t=>t.id===id);
+  if(!t)return;
+  t.done=!t.done;
+  const pts=PTS[t.diff]||25;
+  if(t.done){S.xp+=pts;showToast('MISSION COMPLETE',pts);}
+  else{S.xp=Math.max(0,S.xp-pts);}
+  save(); renderTasks(); updateXP(); updateRankPage();
+}
+function delTask(id){
+  const t=S.tasks.find(t=>t.id===id);
+  if(t&&t.done)S.xp=Math.max(0,S.xp-(PTS[t.diff]||25));
+  S.tasks=S.tasks.filter(t=>t.id!==id);
+  save(); renderTasks(); updateXP(); updateRankPage();
+}
+function renderTasks(){
+  const todo=S.tasks.filter(t=>!t.done);
+  const done=S.tasks.filter(t=>t.done);
+  const dlbl=d=>d==='easy'?'EASY':d==='med'?'MED':'HARD';
+  const dbadge=d=>d==='easy'?'be':d==='med'?'bm':'bh';
+  const ri=t=>`
+    <div class="ti">
+      <button class="tck ${t.done?'done':''}" onclick="toggleTask(${t.id})">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1.5,6 4.5,9 10.5,3"/></svg>
+      </button>
+      <div class="tbody">
+        <div class="tname ${t.done?'dk':''}">${t.name}</div>
+        <div class="tmeta">
+          <span class="badge ${dbadge(t.diff)}">${dlbl(t.diff)}</span>
+          <span class="badge bx">+${PTS[t.diff]||25} XP</span>
+          ${t.subj?`<span class="badge bs">${t.subj}</span>`:''}
+          ${t.due?`<span class="badge bd">${fmtDate(t.due)}</span>`:''}
+        </div>
+      </div>
+      <button class="tdel" onclick="delTask(${t.id})">&#x2715;</button>
+    </div>`;
+  document.getElementById('tl-todo').innerHTML=todo.length?todo.map(ri).join(''):'<div class="empty-st"><div class="eico">// CLEAR //</div>Tidak ada misi aktif</div>';
+  document.getElementById('tl-done').innerHTML=done.length?`<div class="dsec">${done.map(ri).join('')}</div>`:'<div class="empty-st"><div class="eico">// EMPTY //</div>Belum ada misi selesai</div>';
+  updateXP();
+}
+function fmtDate(d){
+  if(!d)return'';
+  const[,m,day]=d.split('-');
+  return`${day}.${['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'][+m-1]}`;
+}
+
+// ═══════════════════════════════════════════════
+// XP / RANK
+// ═══════════════════════════════════════════════
+function getRank(xp){return [...RANKS].reverse().find(r=>xp>=r.min)||RANKS[0];}
+function getNextRank(xp){return RANKS.find(r=>r.min>xp);}
+function updateXP(){
+  const xp=S.xp,rank=getRank(xp),next=getNextRank(xp);
+  const pct=next?((xp-rank.min)/(next.min-rank.min))*100:100;
+  document.getElementById('h-rank').innerHTML=rank.e+' '+rank.n;
+  document.getElementById('h-xpnum').textContent=xp+' XP';
+  document.getElementById('h-fill').style.width=Math.min(pct,100)+'%';
+}
+function renderRank(){updateXP();updateRankPage();}
+function updateRankPage(){
+  const xp=S.xp,rank=getRank(xp);
+  document.getElementById('r-emblem').innerHTML=rank.e;
+  document.getElementById('r-name').textContent=rank.n;
+  document.getElementById('r-xp').textContent=xp;
+  document.getElementById('s-done').textContent=S.tasks.filter(t=>t.done).length;
+  document.getElementById('s-hard').textContent=S.tasks.filter(t=>t.done&&t.diff==='hard').length;
+  buildRankGrid();
+}
+function buildRankGrid(){
+  const xp=S.xp,cur=getRank(xp);
+  document.getElementById('rank-grid').innerHTML=RANKS.map(r=>`
+    <div class="rtile ${r.n===cur.n?'act':''}">
+      <div class="rticon">${r.e}</div>
+      <div class="rtname">${r.n}</div>
+      <div class="rtreq">${r.min===0?'START':r.min+' XP'}</div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════
+// INVENTORY
+// ═══════════════════════════════════════════════
+function openAddInv(){
+  document.getElementById('invname').value='';
+  capturedURL=null; resetCam();
+  openModal('m-inv');
+}
+function startCam(){
+  if(!navigator.mediaDevices){showToast('WARNING: Kamera tidak tersedia');return;}
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false})
+    .then(stream=>{
+      camStream=stream;
+      const v=document.getElementById('camprev');
+      v.srcObject=stream;v.style.display='block';
+      document.getElementById('camph').style.display='none';
+      document.getElementById('cambtns').style.display='flex';
+    }).catch(()=>showToast('WARNING: Izin kamera ditolak'));
+}
+function capPhoto(){
+  const v=document.getElementById('camprev');
+  const c=document.getElementById('photocvs');
+  c.width=v.videoWidth;c.height=v.videoHeight;
+  c.getContext('2d').drawImage(v,0,0);
+  capturedURL=c.toDataURL('image/jpeg',0.75);
+  stopCam();
+  const img=document.getElementById('captimg');
+  img.src=capturedURL;img.style.display='block';
+  document.getElementById('cambtns').style.display='none';
+  document.getElementById('retakebtns').style.display='block';
+}
+function stopCam(){
+  if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}
+  document.getElementById('camprev').style.display='none';
+}
+function retakePh(){
+  capturedURL=null;
+  document.getElementById('captimg').style.display='none';
+  document.getElementById('retakebtns').style.display='none';
+  document.getElementById('camph').style.display='flex';
+  startCam();
+}
+function resetCam(){
+  capturedURL=null;
+  ['camprev','captimg'].forEach(id=>document.getElementById(id).style.display='none');
+  document.getElementById('camph').style.display='flex';
+  document.getElementById('cambtns').style.display='none';
+  document.getElementById('retakebtns').style.display='none';
+}
+function addInventory(){
+  const name=document.getElementById('invname').value.trim();
+  if(!name){showToast('WARNING: Nama barang kosong');return;}
+  S.inventory.push({id:Date.now(),name,img:capturedURL});
+  save(); renderInventory();
+  stopCam(); closeModal('m-inv');
+  showToast('OK: Item registered to Gear');
+}
+function delInv(id){
+  S.inventory=S.inventory.filter(i=>i.id!==id);
+  save(); renderInventory();
+}
+function renderInventory(){
+  const g=document.getElementById('inv-grid');
+  if(!S.inventory.length){
+    g.innerHTML='<div class="iempty">// GEAR STORAGE EMPTY //<br><br>Scan barang pertamamu</div>';
+    return;
+  }
+  g.innerHTML=S.inventory.map(item=>`
+    <div class="iitem">
+      ${item.img?`<img class="iimg" src="${item.img}" alt="${item.name}" loading="lazy">`:'<div class="iph">&#x2B21;</div>'}
+      <div class="iinfo"><div class="iname">${item.name}</div></div>
+      <button class="idel" onclick="delInv(${item.id})">&#x2715;</button>
+    </div>`).join('');
+}
+
+// init XP bar on load
+updateXP();
+</script>
+</body>
+</html>
